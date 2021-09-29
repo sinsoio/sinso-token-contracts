@@ -17,7 +17,7 @@ contract TokenTimeLockFactory is Ownable {
     event TokenTimeLockDeployed(address contractAddress);
 
     // mapping to keep track of which contracts were deployed by this factory
-    mapping(address => address) private deployedContracts;
+    mapping(address => address) private _deployedContracts;
 
     // ERC20 basic token contract
     IERC20 private _token;
@@ -46,6 +46,13 @@ contract TokenTimeLockFactory is Ownable {
     }
 
     /**
+     * @return get deployedContracts
+     */
+    function deployedContracts() public view virtual returns (mapping(address => address)) {
+        return _deployedContracts;
+    }
+
+    /**
      * @notice creates a clone of the master tokenTimeLock contract
      */
     function deployTokenTimeLock(
@@ -69,7 +76,7 @@ contract TokenTimeLockFactory is Ownable {
             interval_,
             revocable_
         );
-        deployedContracts[contractAddress] = beneficiary_;
+        _deployedContracts[contractAddress] = beneficiary_;
         emit TokenTimeLockDeployed(contractAddress);
         return contractAddress;
     }
