@@ -55,7 +55,7 @@ contract TokenTimeLockFactory is Ownable {
         uint256 duration_,
         uint256 interval_,
         bool revocable_
-    ) public returns (address) {
+    ) public onlyOwner returns (address) {
         address contractAddress = Clones.cloneDeterministic(
             master(),
             keccak256(abi.encode(msg.sender))
