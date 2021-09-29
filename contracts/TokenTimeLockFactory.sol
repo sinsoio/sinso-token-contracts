@@ -1,7 +1,6 @@
 // contracts/TokenTimeLockFactory.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-pragma abicoder v2;
 
 import "./TokenTimeLock.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
@@ -17,7 +16,7 @@ contract TokenTimeLockFactory is Ownable {
     event TokenTimeLockDeployed(address contractAddress);
 
     // mapping to keep track of which contracts were deployed by this factory
-    mapping(address => address) private _deployedContracts;
+    mapping(address => address) public _deployedContracts;
 
     // ERC20 basic token contract
     IERC20 private _token;
@@ -46,10 +45,15 @@ contract TokenTimeLockFactory is Ownable {
     }
 
     /**
-     * @return get deployedContracts
+     * @return the beneficiary
      */
-    function deployedContracts() public view virtual returns (mapping(address => address)) {
-        return _deployedContracts;
+    function beneficiary(address contractAddress_)
+        public
+        view
+        virtual
+        returns (address)
+    {
+        return _deployedContracts[contractAddress_];
     }
 
     /**
@@ -63,10 +67,7 @@ contract TokenTimeLockFactory is Ownable {
         uint256 interval_,
         bool revocable_
     ) public onlyOwner returns (address) {
-        address contractAddress = Clones.cloneDeterministic(
-            master(),
-            keccak256(abi.encode(msg.sender))
-        );
+        address contractAddress = Clones.clone(master());
         TokenTimeLock(contractAddress).init(
             token(),
             beneficiary_,
