@@ -16,7 +16,7 @@ contract TokenTimeLockFactory is Ownable {
     event TokenTimeLockDeployed(address contractAddress);
 
     // mapping to keep track of which contracts were deployed by this factory
-    mapping(address => address) public _deployedContracts;
+    mapping(address => address) private _deployedContracts;
 
     // ERC20 basic token contract
     IERC20 private _token;
