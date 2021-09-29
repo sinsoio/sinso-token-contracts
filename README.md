@@ -4,7 +4,7 @@ This is a sample project of [OpenZeppelin contracts](https://openzeppelin.com/co
 
 ## Smart Contracts
 
-- **contracts/SinsoToken.sol**: a smart contract implements [ERC-20](https://docs.openzeppelin.com/contracts/4.x/erc20).
+- **contracts/Token.sol**: a smart contract implements [ERC-20](https://docs.openzeppelin.com/contracts/4.x/erc20).
 
 ## Reference
 
