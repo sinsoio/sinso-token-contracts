@@ -1,6 +1,6 @@
 async function main() {
-  const SinsoToken = await ethers.getContractFactory('SinsoToken')
-  const deployed = await SinsoToken.deploy("0xx",100000000000000000000000000)
+  const Token = await ethers.getContractFactory('Token')
+  const deployed = await Token.deploy("0xx",100000000000000000000000000)
   console.log('Contract deployed to:', deployed.address)
 }
 
