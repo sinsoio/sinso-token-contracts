@@ -51,10 +51,8 @@ contract TokenAirdroper is Ownable {
      */
     function sumAirdropAmount() public view virtual returns (uint256) {
          uint256 sumAmount = 0;
-         uint256 num = 0;
          for(uint256 i = _effectiveIndex; i < _allAirdropList.length; i++){
-            num = _airdropPlanMap[_allAirdropList[i]];
-            sumAmount = sumAmount.add(num);
+            sumAmount = sumAmount.add(_airdropPlanMap[_allAirdropList[i]]);
         }
         return sumAmount;
     }
@@ -94,7 +92,6 @@ contract TokenAirdroper is Ownable {
     function updatePlan(address recipient_,uint256 amount_) public onlyOwner {
         require(_airdropPlanMap[recipient_] != 0,"recipient  is not in airdrops");
         require(amount_ > 0,"amount must > 0");
-        require(_airdropPlanMap[recipient_] != 0,"recipient isAirdroped");
         _airdropPlanMap[recipient_] = amount_;
     }
 
@@ -114,15 +111,13 @@ contract TokenAirdroper is Ownable {
         require(checkBalanceStatus(),"owner balance is insufficient");
         uint256 j = 1;
         for(uint256 i = _effectiveIndex; i < _allAirdropList.length; i++){
-            if(_airdropPlanMap[_allAirdropList[i]] != 0){
-                if (j > maxAirdropNum()){
-                    break;
-                }
-                _token.safeTransfer(_allAirdropList[i], _airdropPlanMap[_allAirdropList[i]]);
-                // delete plans
-                delete _airdropPlanMap[_allAirdropList[i]];
-                j++;
+            if (j > maxAirdropNum()){
+                break;
             }
+            _token.safeTransfer(_allAirdropList[i], _airdropPlanMap[_allAirdropList[i]]);
+            // delete plans
+            delete _airdropPlanMap[_allAirdropList[i]];
+            j++;
         }
         _effectiveIndex = _effectiveIndex.add(j-1);
     }
