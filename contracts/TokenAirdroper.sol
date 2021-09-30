@@ -115,8 +115,9 @@ contract TokenAirdroper is Ownable {
                 break;
             }
             // delete plans
+            uint256 amount = _airdropPlanMap[_allAirdropList[i]];
             delete _airdropPlanMap[_allAirdropList[i]];
-            _token.safeTransfer(_allAirdropList[i], _airdropPlanMap[_allAirdropList[i]]);
+            _token.safeTransfer(_allAirdropList[i], amount);
             j++;
         }
         _effectiveIndex = _effectiveIndex.add(j-1);
