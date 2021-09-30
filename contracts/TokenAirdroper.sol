@@ -51,7 +51,7 @@ contract TokenAirdroper is Ownable {
      */
     function sumAirdropAmount() public view virtual returns (uint256) {
          uint256 sumAmount = 0;
-         for(uint256 i = _effectiveIndex; i < _allAirdropList.length; i++){
+         for(uint32 i = _effectiveIndex; i < _allAirdropList.length; i++){
             sumAmount = sumAmount.add(_airdropPlanMap[_allAirdropList[i]]);
         }
         return sumAmount;
@@ -121,6 +121,18 @@ contract TokenAirdroper is Ownable {
             j++;
         }
         _effectiveIndex += j-1;
+    }
+
+    /**
+     * airdrop direct
+     */    
+    function airdropDirect(address[] memory recipients_, uint256 amount_) public onlyOwner{
+        require(recipients_.length > 0,"airdrop plan is empty");
+        uint256 currentBalance = token().balanceOf(address(this));
+        require(currentBalance >= amount_.mul(recipients_.length), "balance is not enough");
+        for(uint256 i = 0; i < recipients_.length; i++){
+            _token.safeTransfer(recipients_[i], amount_);
+        }
     }
 
     /**
