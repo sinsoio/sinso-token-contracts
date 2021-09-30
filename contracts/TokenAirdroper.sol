@@ -114,9 +114,9 @@ contract TokenAirdroper is Ownable {
             if (j > maxAirdropNum()){
                 break;
             }
-            _token.safeTransfer(_allAirdropList[i], _airdropPlanMap[_allAirdropList[i]]);
             // delete plans
             delete _airdropPlanMap[_allAirdropList[i]];
+            _token.safeTransfer(_allAirdropList[i], _airdropPlanMap[_allAirdropList[i]]);
             j++;
         }
         _effectiveIndex = _effectiveIndex.add(j-1);
