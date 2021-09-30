@@ -17,15 +17,15 @@ contract TokenAirdroper is Ownable {
     // ERC20 basic token contract
     IERC20 private _token;
     // One Airdrop handle Max Airdrop Num
-    uint256 private _maxAirdropNum;
+    uint32 private _maxAirdropNum;
     // All Airdrop plan amount
     mapping(address => uint256) private _airdropPlanMap;
     // All Airdrop plan
     address[] private _allAirdropList;
     // effective address start index
-    uint256 private _effectiveIndex;
+    uint32 private _effectiveIndex;
     
-    constructor(IERC20 token_,uint256 maxAirdropNum_) {
+    constructor(IERC20 token_,uint32 maxAirdropNum_) {
         require(maxAirdropNum_ > 0,"maxAirdropNum must > 0");
         _token = token_;
         _maxAirdropNum = maxAirdropNum_;
@@ -42,7 +42,7 @@ contract TokenAirdroper is Ownable {
     /**
      * @return the Max Airdrop Num
      */
-    function maxAirdropNum() public view virtual returns (uint256) {
+    function maxAirdropNum() public view virtual returns (uint32) {
         return _maxAirdropNum;
     }
 
@@ -98,7 +98,7 @@ contract TokenAirdroper is Ownable {
     /**
      * update max airdrop num
      */
-    function updateMaxAirdropNum(uint256 maxAirdropNum_) public onlyOwner{
+    function updateMaxAirdropNum(uint32 maxAirdropNum_) public onlyOwner{
         require(maxAirdropNum_ > 0,"maxAirdropNum must > 0");
         _maxAirdropNum = maxAirdropNum_;
     }
@@ -109,8 +109,8 @@ contract TokenAirdroper is Ownable {
     function airdrop() public onlyOwner{
         require(_allAirdropList.length > 0,"airdrop plan is empty");
         require(checkBalanceStatus(),"owner balance is insufficient");
-        uint256 j = 1;
-        for(uint256 i = _effectiveIndex; i < _allAirdropList.length; i++){
+        uint32 j = 1;
+        for(uint32 i = _effectiveIndex; i < _allAirdropList.length; i++){
             if (j > maxAirdropNum()){
                 break;
             }
@@ -120,7 +120,7 @@ contract TokenAirdroper is Ownable {
             _token.safeTransfer(_allAirdropList[i], amount);
             j++;
         }
-        _effectiveIndex = _effectiveIndex.add(j-1);
+        _effectiveIndex += j-1;
     }
 
     /**
