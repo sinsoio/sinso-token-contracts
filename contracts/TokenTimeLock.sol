@@ -255,14 +255,14 @@ contract TokenTimeLock is Ownable {
     /**
      * @notice beneficiary confirm
      */
-    function confrimContract(address beneficiary_, uint256 amount_)
+    function confirmContract(address beneficiary_, uint256 amount_)
         public
         virtual
     {
-        require(msg.sender == _signer, "sender must be beneficiary");
-        require(beneficiary_ == _beneficiary, "beneficiary verify failure");
-        require(_amount == amount_, "amount verify failure");
-        require(!_confirm, "already confirm");
+        require(signer() == msg.sender, "sender must be signer");
+        require(beneficiary() == beneficiary_, "beneficiary verify failure");
+        require(amount() == amount_, "amount verify failure");
+        require(!confirm(), "already confirm");
         _confirm = true;
     }
 }
