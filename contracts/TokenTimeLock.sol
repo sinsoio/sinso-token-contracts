@@ -25,21 +25,16 @@ contract TokenTimeLock is Ownable {
     uint256 private immutable _stages;
     // Recyclable or not
     bool private immutable _revocable;
-
     // release downpayment immediately
     bool private immutable _immediately;
     // released downpayment immediately
     bool private _immediatelyed;
-
     // contract amount
     uint256 private immutable _amount;
-
     // beneficiary confirm contract
     bool private _confirm;
-
     // signer
     address private immutable _signer;
-
     // interval
     uint256 private immutable _interval;
     // released
@@ -48,11 +43,8 @@ contract TokenTimeLock is Ownable {
     bool private _revoked;
 
     event Released(uint256 amount);
-    event Revoked();
+    event Revoked(uint256 amount);
 
-    /**
-     * constructor
-     */
     constructor(
         IERC20 token_,
         address beneficiary_,
@@ -63,7 +55,7 @@ contract TokenTimeLock is Ownable {
         uint256 interval_,
         bool immediately_,
         bool revocable_
-    ) {
+    ){
         require(beneficiary_ != address(0), "beneficiary must not empty");
         require(signer_ != address(0), "signer must not empty");
         require(amount_ > 0, "amount must > 0");
@@ -235,7 +227,7 @@ contract TokenTimeLock is Ownable {
         require(currentBalance > 0, "Lock Token: no tokens to revoked");
         token().safeTransfer(owner(), currentBalance);
         _revoked = true;
-        emit Revoked();
+        emit Revoked(currentBalance);
     }
 
     /**

@@ -3,7 +3,6 @@
 pragma solidity ^0.8.0;
 
 import "./TokenTimeLock.sol";
-import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
@@ -104,7 +103,7 @@ contract TokenTimeLockFactory is Ownable {
         bool immediately_,
         bool revocable_
     ) public virtual onlyOwner returns (address) {
-        TokenTimeLock timeLock = new TokenTimeLock(
+        TokenTimeLock _tokenTimeLock = new TokenTimeLock(
             token(),
             beneficiary_,
             signer_,
@@ -115,11 +114,11 @@ contract TokenTimeLockFactory is Ownable {
             immediately_,
             revocable_
         );
-        address contractAddress = address(timeLock);
-        _deployedContracts[contractAddress] = beneficiary_;
-        _deployedContractList.push(contractAddress);
-        emit TokenTimeLockDeployed(contractAddress);
-        return contractAddress;
+        address _contractAddress = address(_tokenTimeLock);
+        _deployedContracts[_contractAddress] = beneficiary_;
+        _deployedContractList.push(_contractAddress);
+        emit TokenTimeLockDeployed(_contractAddress);
+        return _contractAddress;
     }
 
     /**
