@@ -122,6 +122,14 @@ contract TokenTimeLockFactory is Ownable {
     }
 
     /**
+     * @dev Throws if called by any account other than the checker.
+     */
+    modifier onlyChecker() {
+        require(checker() == _msgSender(), "Ownable: checker is not the owner");
+        _;
+    }
+
+    /**
      * @notice check contract
      */
     function checkContract(
@@ -134,7 +142,7 @@ contract TokenTimeLockFactory is Ownable {
         uint256 interval_,
         bool immediately_,
         bool revocable_
-    ) public virtual onlyOwner {
+    ) public virtual onlyChecker {
         require(beneficiary(contract_) != address(0), "contract is not exist");
         require(!checked(contract_), "contract already checked");
         TokenTimeLock tokenTimeLock = TokenTimeLock(contract_);

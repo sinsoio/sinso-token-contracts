@@ -243,15 +243,20 @@ contract TokenTimeLock is Ownable {
         token().safeTransfer(beneficiary(), unreleased);
         emit Released(unreleased);
     }
+  /**
+     * @dev Throws if called by any account other than the signer.
+     */
+    modifier onlySigner() {
+        require(signer() == _msgSender(), "Ownable: checker is not the signer");
+        _;
+    }
 
     /**
      * @notice beneficiary confirm
      */
     function confirmContract(address beneficiary_, uint256 amount_)
-        public
-        virtual
+        public virtual onlySigner 
     {
-        require(signer() == msg.sender, "sender must be signer");
         require(beneficiary() == beneficiary_, "beneficiary verify failure");
         require(amount() == amount_, "amount verify failure");
         require(!confirm(), "already confirm");
