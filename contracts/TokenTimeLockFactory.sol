@@ -195,7 +195,7 @@ contract TokenTimeLockFactory is Ownable {
         onlyOwner
     {
         require(beneficiary(contract_) != address(0), "contract is not exist");
-        require(!checked(contract_), "contract already checked");
+        require(checked(contract_), "contract is not check");
         TokenTimeLock(contract_).setStart(start_);
     }
 
