@@ -200,6 +200,25 @@ contract TokenTimeLockFactory is Ownable {
     }
 
     /**
+     * @notice batch set start
+     */
+    function batchSetStart(address[] contracts_, uint256 start_)
+        public
+        virtual
+        onlyOwner
+    {
+        require(contracts_.length > 0, "contracts is not empty");
+        require(start_ > block.timestamp, "start must > current time");
+        require(
+            start_ < block.timestamp + 7776000,
+            "contracts must < current time add 7776000s"
+        );
+        for (uint256 i = 0; i < contracts_.length; i++) {
+            setStart(contracts_[i], start_);
+        }
+    }
+
+    /**
      * @notice withdraw
      */
     function withdraw(IERC20 token_, uint256 amount_) public virtual onlyOwner {
