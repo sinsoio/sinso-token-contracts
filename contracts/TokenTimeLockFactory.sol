@@ -23,7 +23,7 @@ contract TokenTimeLockFactory is Ownable {
     // checked contract
     mapping(address => bool) private _checkedContracts;
     // ERC20 basic token contract
-    IERC20 private _token;
+    IERC20 private immutable _token;
     // contract checker
     address private _checker;
 

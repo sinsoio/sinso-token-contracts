@@ -14,34 +14,34 @@ contract TokenTimeLock is Ownable {
     using SafeERC20 for IERC20;
 
     // ERC20 basic token contract being held
-    IERC20 private _token;
+    IERC20 private immutable _token;
     // beneficiary of tokens after they are released
-    address private _beneficiary;
+    address private  immutable _beneficiary;
     // Start time (Unix time), prompt from what time to start timing
     uint256 private _start;
     // Release down payment at start time
-    uint256 private _downpayment;
+    uint256 private immutable  _downpayment;
     // Total statges
-    uint256 private _stages;
+    uint256 private  immutable _stages;
     // Recyclable or not
-    bool private _revocable;
+    bool private immutable _revocable;
 
     // release downpayment immediately
-    bool private _immediately;
+    bool private immutable _immediately;
     // released downpayment immediately
     bool private _immediatelyed;
 
     // contract amount
-    uint256 private _amount;
+    uint256 private immutable _amount;
 
     // beneficiary confirm contract
     bool private _confirm;
 
     // signer
-    address private _signer;
+    address private immutable _signer;
 
     // interval
-    uint256 private _interval;
+    uint256 private immutable  _interval;
     // released
     uint256 private _released;
     // revoked
