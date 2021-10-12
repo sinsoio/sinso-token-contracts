@@ -13,9 +13,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract TokenTimeLockFactory is Ownable {
     using SafeERC20 for IERC20;
     // event fired on every new tokenTimeLock deployment
-    event TokenTimeLockDeployed(address contractAddress);
+    event TokenTimeLockDeployed(address _contractAddress);
     // event check contract
-    event CheckContract(address contractAddress);
+    event CheckContract(address _contractAddress);
     // mapping to keep track of which contracts were deployed by this factory
     mapping(address => address) private _deployedContracts;
     // list to keep track of which contracts were deployed by this factory
