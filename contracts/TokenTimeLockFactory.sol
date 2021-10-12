@@ -28,7 +28,7 @@ contract TokenTimeLockFactory is Ownable {
     address private _checker;
 
     constructor(IERC20 token_, address checker_) {
-        require(checker_!= address(0), "checker not empty");
+        require(checker_ != address(0), "checker not empty");
         _token = token_;
         _checker = checker_;
     }
@@ -87,7 +87,7 @@ contract TokenTimeLockFactory is Ownable {
      * @notice set a new checker
      */
     function changeChecker(address newChecker_) public virtual onlyOwner {
-        require(newChecker_!= address(0), "newChecker not empty");
+        require(newChecker_ != address(0), "newChecker not empty");
         _checker = newChecker_;
     }
 
@@ -103,7 +103,7 @@ contract TokenTimeLockFactory is Ownable {
         uint256 interval_,
         bool immediately_,
         bool revocable_
-    ) public  virtual onlyOwner returns (address) {
+    ) public virtual onlyOwner returns (address) {
         TokenTimeLock timeLock = new TokenTimeLock(
             token(),
             beneficiary_,
@@ -135,7 +135,7 @@ contract TokenTimeLockFactory is Ownable {
         uint256 interval_,
         bool immediately_,
         bool revocable_
-    ) public virtual onlyOwner{
+    ) public virtual onlyOwner {
         require(beneficiary(contract_) != address(0), "contract is not exist");
         require(!checked(contract_), "contract already checked");
         TokenTimeLock tokenTimeLock = TokenTimeLock(contract_);

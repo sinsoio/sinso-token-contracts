@@ -16,13 +16,13 @@ contract TokenTimeLock is Ownable {
     // ERC20 basic token contract being held
     IERC20 private immutable _token;
     // beneficiary of tokens after they are released
-    address private  immutable _beneficiary;
+    address private immutable _beneficiary;
     // Start time (Unix time), prompt from what time to start timing
     uint256 private _start;
     // Release down payment at start time
-    uint256 private immutable  _downpayment;
+    uint256 private immutable _downpayment;
     // Total statges
-    uint256 private  immutable _stages;
+    uint256 private immutable _stages;
     // Recyclable or not
     bool private immutable _revocable;
 
@@ -41,7 +41,7 @@ contract TokenTimeLock is Ownable {
     address private immutable _signer;
 
     // interval
-    uint256 private immutable  _interval;
+    uint256 private immutable _interval;
     // released
     uint256 private _released;
     // revoked
