@@ -247,7 +247,7 @@ contract TokenTimeLock is Ownable {
      * @dev Throws if called by any account other than the signer.
      */
     modifier onlySigner() {
-        require(signer() == _msgSender(), "Ownable: checker is not the signer");
+        require(signer() == _msgSender(), "only signer auth handle");
         _;
     }
 

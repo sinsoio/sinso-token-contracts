@@ -125,7 +125,7 @@ contract TokenTimeLockFactory is Ownable {
      * @dev Throws if called by any account other than the checker.
      */
     modifier onlyChecker() {
-        require(checker() == _msgSender(), "Ownable: checker is not the owner");
+        require(checker() == _msgSender(), "only checker auth handle");
         _;
     }
 
