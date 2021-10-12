@@ -17,46 +17,74 @@ contract TokenTimeLock is Ownable {
     IERC20 private _token;
     // beneficiary of tokens after they are released
     address private _beneficiary;
-    //The unit is second (s), cliff time
-    uint256 private _cliff;
-    //Start time (Unix time), prompt from what time to start timing
+    // Start time (Unix time), prompt from what time to start timing
     uint256 private _start;
-    //Unit: second (s), duration of warehouse lock
-    uint256 private _duration;
-    //interval
-    uint256 private _interval;
-    //Recyclable or not
+    // Release down payment at start time
+    uint256 private _downpayment;
+    // Total statges
+    uint256 private _stages;
+    // Recyclable or not
     bool private _revocable;
+
+    // release downpayment immediately
+    bool private _immediately;
+    // released downpayment immediately
+    bool private _immediatelyed;
+
+    // contract amount
+    uint256 private _amount;
+
+    // beneficiary confirm contract
+    bool private _confirm;
+
+    // signer
+    address private _signer;
+
+    // interval
+    uint256 private _interval;
     // released
     uint256 private _released;
-    //revoked
+    // revoked
     bool private _revoked;
 
     event Released(uint256 amount);
     event Revoked();
 
     /**
-     * init
+     * constructor
      */
-    function init(
+    constructor(
         IERC20 token_,
         address beneficiary_,
-        uint256 start_,
-        uint256 cliff_,
-        uint256 duration_,
+        address signer_,
+        uint256 amount_,
+        uint256 downpayment_,
+        uint256 stages_,
         uint256 interval_,
+        bool immediately_,
         bool revocable_
-    ) public {
-        require(beneficiary_ != address(0), "beneficiary must not this");
-        require(cliff_ <= duration_, "duration time must >= cliff time");
-        require(start_ > block.timestamp, "start time must > current time");
-        require(interval_ <= duration_, "interval must <= duration");
+    ) {
+        require(beneficiary_ != address(0), "beneficiary must not empty");
+        require(signer_ != address(0), "signer must not empty");
+        require(amount_ > 0, "amount must > 0");
+        require(downpayment_ >= 0, "downpayment_ must >= 0");
+        require(amount_ >= downpayment_, "amount must > downpayment");
+        require(stages_ > 0, "stages must > 0");
+        require(interval_ > 0, "interval must > 0");
+        if (immediately_) {
+            require(
+                downpayment_ > 0,
+                "immediately downpayment association error"
+            );
+        }
         _token = token_;
         _beneficiary = beneficiary_;
-        _cliff = cliff_;
-        _start = start_;
-        _duration = duration_;
+        _signer = signer_;
+        _amount = amount_;
+        _downpayment = downpayment_;
+        _stages = stages_;
         _interval = interval_;
+        _immediately = immediately_;
         _revocable = revocable_;
     }
 
@@ -75,10 +103,10 @@ contract TokenTimeLock is Ownable {
     }
 
     /**
-     * @return The unit is second (s), cliff time.
+     * @return Release down payment at start time.
      */
-    function cliff() public view virtual returns (uint256) {
-        return _cliff;
+    function downpayment() public view virtual returns (uint256) {
+        return _downpayment;
     }
 
     /**
@@ -89,10 +117,10 @@ contract TokenTimeLock is Ownable {
     }
 
     /**
-     * @return Unit: second (s), duration of warehouse lock.
+     * @return _stages
      */
-    function duration() public view virtual returns (uint256) {
-        return _duration;
+    function stages() public view virtual returns (uint256) {
+        return _stages;
     }
 
     /**
@@ -124,39 +152,88 @@ contract TokenTimeLock is Ownable {
     }
 
     /**
+     * @return amount
+     */
+    function amount() public view virtual returns (uint256) {
+        return _amount;
+    }
+
+    /**
+     * @return confirm
+     */
+    function confirm() public view virtual returns (bool) {
+        return _confirm;
+    }
+
+    /**
+     * @return release downpayment immediately
+     */
+    function immediately() public view virtual returns (bool) {
+        return _immediately;
+    }
+
+    /**
+     * @return release downpayment immediatelyed
+     */
+    function immediatelyed() public view virtual returns (bool) {
+        return _immediatelyed;
+    }
+
+    /**
+     * @return signer
+     */
+    function signer() public view virtual returns (address) {
+        return _signer;
+    }
+
+    /**
+     * @notice set start
+     */
+    function setStart(uint256 start_) public virtual onlyOwner {
+        require(_start == 0, "start is already set");
+        require(start_ > block.timestamp, "start must > current time");
+        _start = start_;
+    }
+
+    /**
      * @return  releasable
      */
     function releasableAmount() public view returns (uint256) {
         uint256 currentBalance = token().balanceOf(address(this));
-        if (block.timestamp < start().add(cliff())) {
+        if (immediately() && !immediatelyed()) {
+            return downpayment();
+        }
+        if (start() == 0) {
             return 0;
-        } else if (block.timestamp >= start().add(duration()) || revoked()) {
+        }
+        if (block.timestamp < start()) {
+            return 0;
+        } else if (
+            block.timestamp >= start().add(stages().mul(interval())) ||
+            revoked()
+        ) {
             return currentBalance;
         } else {
             uint256 totalBalance = currentBalance.add(released());
-            return
-                totalBalance
-                    .mul(
-                        block.timestamp.sub(start()).div(interval()).mul(
-                            interval()
-                        )
-                    )
-                    .div(duration())
-                    .sub(released());
+            uint256 amountTmp = totalBalance
+                .sub(downpayment())
+                .mul(block.timestamp.sub(start()).div(interval()))
+                .div(stages());
+            return amountTmp.add(downpayment()).sub(released());
         }
     }
 
     /**
      * @notice Allows the owner to revoke the vesting. Tokens already vested
      */
-    function revoke() public onlyOwner {
+    function revoke() public virtual onlyOwner {
         require(revocable(), "not support revoke");
         require(!revoked(), "already revoked");
-        uint256 currentBalance = token().balanceOf(address(this));
         uint256 unreleased = releasableAmount();
-        uint256 refund = currentBalance.sub(unreleased);
-        require(refund > 0, "Lock Token: no tokens to revoked");
-        token().safeTransfer(owner(), refund);
+        require(unreleased == 0, "please release amount before");
+        uint256 currentBalance = token().balanceOf(address(this));
+        require(currentBalance > 0, "Lock Token: no tokens to revoked");
+        token().safeTransfer(owner(), currentBalance);
         _revoked = true;
         emit Revoked();
     }
@@ -168,7 +245,24 @@ contract TokenTimeLock is Ownable {
         uint256 unreleased = releasableAmount();
         require(unreleased > 0, "Lock Token: no tokens to release");
         _released = released().add(unreleased);
+        if (immediately() && !immediatelyed()) {
+            _immediatelyed = true;
+        }
         token().safeTransfer(beneficiary(), unreleased);
         emit Released(unreleased);
+    }
+
+    /**
+     * @notice beneficiary confirm
+     */
+    function confrimContract(address beneficiary_, uint256 amount_)
+        public
+        virtual
+    {
+        require(msg.sender == _signer, "sender must be beneficiary");
+        require(beneficiary_ == _beneficiary, "beneficiary verify failure");
+        require(_amount == amount_, "amount verify failure");
+        require(!_confirm, "already confirm");
+        _confirm = true;
     }
 }
