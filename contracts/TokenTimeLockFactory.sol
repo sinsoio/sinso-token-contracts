@@ -202,7 +202,7 @@ contract TokenTimeLockFactory is Ownable {
     /**
      * @notice batch set start
      */
-    function batchSetStart(address[] contracts_, uint256 start_)
+    function batchSetStart(address[] memory contracts_, uint256 start_)
         public
         virtual
         onlyOwner
