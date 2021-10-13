@@ -53,6 +53,39 @@
     },
     {
       "inputs": [],
+      "name": "check",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "checked",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "checker",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "confirm",
       "outputs": [
         {
@@ -136,6 +169,11 @@
         {
           "internalType": "address",
           "name": "signer_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "checker_",
           "type": "address"
         },
         {
