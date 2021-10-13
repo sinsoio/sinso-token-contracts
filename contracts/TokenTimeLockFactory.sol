@@ -5,6 +5,7 @@ pragma solidity ^0.8.0;
 import "./TokenTimeLock.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 /**
  * @title Factory contract for TokenTimelock
@@ -12,6 +13,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
  */
 contract TokenTimeLockFactory is Context {
     using SafeERC20 for IERC20;
+    using SafeMath for uint256;
     // event fired on every new tokenTimeLock deployment
     event TokenTimeLockDeployed(address _contractAddress);
     // event check contract
