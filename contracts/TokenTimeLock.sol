@@ -2,50 +2,55 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title TokenTimeLock
  */
-contract TokenTimeLock is Ownable {
+contract TokenTimeLock is Context {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     // ERC20 basic token contract being held
-    IERC20 private immutable _token;
+    IERC20 private _token;
     // beneficiary of tokens after they are released
-    address private immutable _beneficiary;
+    address private _beneficiary;
     // Start time (Unix time), prompt from what time to start timing
     uint256 private _start;
     // Release down payment at start time
-    uint256 private immutable _downpayment;
+    uint256 private _downpayment;
     // Total statges
-    uint256 private immutable _stages;
+    uint256 private _stages;
     // Recyclable or not
-    bool private immutable _revocable;
+    bool private _revocable;
     // release downpayment immediately
-    bool private immutable _immediately;
+    bool private _immediately;
     // released downpayment immediately
     bool private _immediatelyed;
     // contract amount
-    uint256 private immutable _amount;
+    uint256 private _amount;
     // beneficiary confirm contract
     bool private _confirm;
     // signer
-    address private immutable _signer;
+    address private _signer;
     // interval
-    uint256 private immutable _interval;
+    uint256 private _interval;
     // released
     uint256 private _released;
     // revoked
     bool private _revoked;
+    // owner
+    address private _owner;
 
     event Released(uint256 amount);
     event Revoked(uint256 amount);
 
-    constructor(
+    /**
+     * init
+     */
+    function init(
         IERC20 token_,
         address beneficiary_,
         address signer_,
@@ -55,7 +60,8 @@ contract TokenTimeLock is Ownable {
         uint256 interval_,
         bool immediately_,
         bool revocable_
-    ){
+    ) public virtual {
+        require(owner() == address(0), "contract is init");
         require(beneficiary_ != address(0), "beneficiary must not empty");
         require(signer_ != address(0), "signer must not empty");
         require(amount_ > 0, "amount must > 0");
@@ -78,6 +84,7 @@ contract TokenTimeLock is Ownable {
         _interval = interval_;
         _immediately = immediately_;
         _revocable = revocable_;
+        _owner = _msgSender();
     }
 
     /**
@@ -179,6 +186,21 @@ contract TokenTimeLock is Ownable {
     }
 
     /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        _;
+    }
+
+    /**
      * @notice set start
      */
     function setStart(uint256 start_) public virtual onlyOwner {
@@ -243,7 +265,8 @@ contract TokenTimeLock is Ownable {
         token().safeTransfer(beneficiary(), unreleased);
         emit Released(unreleased);
     }
-  /**
+
+    /**
      * @dev Throws if called by any account other than the signer.
      */
     modifier onlySigner() {
@@ -255,7 +278,9 @@ contract TokenTimeLock is Ownable {
      * @notice beneficiary confirm
      */
     function confirmContract(address beneficiary_, uint256 amount_)
-        public virtual onlySigner 
+        public
+        virtual
+        onlySigner
     {
         require(beneficiary() == beneficiary_, "beneficiary verify failure");
         require(amount() == amount_, "amount verify failure");

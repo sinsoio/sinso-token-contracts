@@ -3,13 +3,14 @@
 pragma solidity ^0.8.0;
 
 import "./TokenTimeLock.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/proxy/Clones.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 
 /**
  * @title Factory contract for TokenTimelock
  * @notice This contract deploys TokenTimelock contracts
  */
-contract TokenTimeLockFactory is Ownable {
+contract TokenTimeLockFactory is Context {
     using SafeERC20 for IERC20;
     // event fired on every new tokenTimeLock deployment
     event TokenTimeLockDeployed(address _contractAddress);
@@ -25,11 +26,29 @@ contract TokenTimeLockFactory is Ownable {
     IERC20 private immutable _token;
     // contract checker
     address private _checker;
+    // owner
+    address private immutable _owner;
+    // master
+    address private immutable _master;
 
     constructor(IERC20 token_, address checker_) {
         require(checker_ != address(0), "checker not empty");
         _token = token_;
         _checker = checker_;
+        _owner = _msgSender();
+        TokenTimeLock _tokenTimeLock = new TokenTimeLock();
+        _tokenTimeLock.init(
+            token_,
+            _msgSender(),
+            _msgSender(),
+            10000,
+            100,
+            10,
+            60,
+            false,
+            false
+        );
+        _master = address(_tokenTimeLock);
     }
 
     /**
@@ -83,6 +102,28 @@ contract TokenTimeLockFactory is Ownable {
     }
 
     /**
+     * @dev Returns the address of the current master.
+     */
+    function master() public view virtual returns (address) {
+        return _master;
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        _;
+    }
+
+    /**
      * @notice set a new checker
      */
     function changeChecker(address newChecker_) public virtual onlyOwner {
@@ -103,7 +144,8 @@ contract TokenTimeLockFactory is Ownable {
         bool immediately_,
         bool revocable_
     ) public virtual onlyOwner returns (address) {
-        TokenTimeLock _tokenTimeLock = new TokenTimeLock(
+        address _contractAddress = Clones.clone(master());
+        TokenTimeLock(_contractAddress).init(
             token(),
             beneficiary_,
             signer_,
@@ -114,7 +156,6 @@ contract TokenTimeLockFactory is Ownable {
             immediately_,
             revocable_
         );
-        address _contractAddress = address(_tokenTimeLock);
         _deployedContracts[_contractAddress] = beneficiary_;
         _deployedContractList.push(_contractAddress);
         emit TokenTimeLockDeployed(_contractAddress);
