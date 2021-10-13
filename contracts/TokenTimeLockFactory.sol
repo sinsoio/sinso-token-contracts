@@ -24,6 +24,8 @@ contract TokenTimeLockFactory is Context {
     address[] private _deployedContractList;
     // checked contract
     mapping(address => bool) private _checkedContracts;
+    // invalid contracts
+    mapping(address => bool) private _invalidContracts;
     // ERC20 basic token contract
     IERC20 private immutable _token;
     // contract checker
@@ -85,7 +87,19 @@ contract TokenTimeLockFactory is Context {
     }
 
     /**
-     * @return the contract
+     * @return the contract invalid status
+     */
+    function invalid(address contractAddress_)
+        public
+        view
+        virtual
+        returns (bool)
+    {
+        return _invalidContracts[contractAddress_];
+    }
+
+    /**
+     * @return the contract check status
      */
     function checked(address contractAddress_)
         public
@@ -188,6 +202,7 @@ contract TokenTimeLockFactory is Context {
     ) public virtual onlyChecker {
         require(beneficiary(contract_) != address(0), "contract is not exist");
         require(!checked(contract_), "contract already checked");
+        require(!invalid(contract_), "contract already invalid");
         TokenTimeLock tokenTimeLock = TokenTimeLock(contract_);
         require(tokenTimeLock.token() == token(), "token verify failure");
         require(tokenTimeLock.confirm(), "contract is not confirm");
@@ -220,6 +235,16 @@ contract TokenTimeLockFactory is Context {
         tokenTimeLock.check();
         token().safeTransfer(contract_, amount_);
         emit CheckContract(contract_);
+    }
+
+    /**
+     * @notice check contract
+     */
+    function invalidContract(address contract_) public virtual onlyChecker {
+        require(beneficiary(contract_) != address(0), "contract is not exist");
+        require(!checked(contract_), "contract already checked");
+        require(!invalid(contract_), "contract already invalid");
+        _invalidContracts[contract_] = true;
     }
 
     /**
