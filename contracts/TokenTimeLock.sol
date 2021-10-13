@@ -41,6 +41,10 @@ contract TokenTimeLock is Context {
     uint256 private _released;
     // revoked
     bool private _revoked;
+    // contract checker
+    address private _checker;
+    // revoked
+    bool private _checked;
     // owner
     address private _owner;
 
@@ -54,6 +58,7 @@ contract TokenTimeLock is Context {
         IERC20 token_,
         address beneficiary_,
         address signer_,
+        address checker_,
         uint256 amount_,
         uint256 downpayment_,
         uint256 stages_,
@@ -78,6 +83,7 @@ contract TokenTimeLock is Context {
         _token = token_;
         _beneficiary = beneficiary_;
         _signer = signer_;
+        _checker = checker_;
         _amount = amount_;
         _downpayment = downpayment_;
         _stages = stages_;
@@ -179,6 +185,13 @@ contract TokenTimeLock is Context {
     }
 
     /**
+     * @return checked
+     */
+    function checked() public view virtual returns (bool) {
+        return _checked;
+    }
+
+    /**
      * @return signer
      */
     function signer() public view virtual returns (address) {
@@ -201,6 +214,21 @@ contract TokenTimeLock is Context {
     }
 
     /**
+     * @dev Returns the address of the current checker.
+     */
+    function checker() public view virtual returns (address) {
+        return _checker;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the checker.
+     */
+    modifier onlyChecker() {
+        require(checker() == _msgSender(), "only checker auth handle");
+        _;
+    }
+
+    /**
      * @notice set start
      */
     function setStart(uint256 start_) public virtual onlyOwner {
@@ -210,9 +238,20 @@ contract TokenTimeLock is Context {
     }
 
     /**
+     * @notice check contract
+     */
+    function check() public virtual onlyChecker {
+        require(!checked(), "contract is already checked");
+        _checked = true;
+    }
+
+    /**
      * @return  releasable
      */
     function releasableAmount() public view returns (uint256) {
+        if (!checked()) {
+            return 0;
+        }
         uint256 currentBalance = token().balanceOf(address(this));
         if (immediately() && !immediatelyed()) {
             return downpayment();

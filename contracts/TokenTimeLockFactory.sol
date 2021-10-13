@@ -41,6 +41,7 @@ contract TokenTimeLockFactory is Context {
             token_,
             _msgSender(),
             _msgSender(),
+            checker_,
             10000,
             100,
             10,
@@ -149,6 +150,7 @@ contract TokenTimeLockFactory is Context {
             token(),
             beneficiary_,
             signer_,
+            checker(),
             amount_,
             downpayment_,
             stages_,
@@ -215,6 +217,7 @@ contract TokenTimeLockFactory is Context {
         uint256 currentBalance = token().balanceOf(address(this));
         require(currentBalance >= amount_, "current balance insufficient");
         _checkedContracts[contract_] = true;
+        tokenTimeLock.check();
         token().safeTransfer(contract_, amount_);
         emit CheckContract(contract_);
     }
